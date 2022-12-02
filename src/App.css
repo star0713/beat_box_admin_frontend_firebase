@@ -1,0 +1,51 @@
+.ant-modal .ant-modal-content {
+    padding: 0;
+    border-radius: 25px;
+    background-color: transparent;
+}
+
+.ant-modal {
+    border-radius: 25px;
+    padding: 0;
+    background-color: transparent;
+}
+
+.bg-c-dark {
+    background: rgb(3, 2, 20);
+    background: linear-gradient(176deg, rgba(3, 2, 20, 0.8) 0%, rgba(4, 3, 62, 0.8) 46%, rgba(7, 7, 138, 0.8) 75%, rgba(2, 56, 134, 0.8) 100%);
+    backdrop-filter: blur(15px);
+
+}
+
+.round-lg {
+    border-radius: 15px;
+}
+.css-1s2u09g-control{
+    
+    background-color: hsl(227deg 46% 14%) !important;
+    border-radius:15px !important;
+    border-color:grey !important;
+    color:white !important
+
+}
+
+.css-qc6sy-singleValue{
+    color:white !important
+}
+.css-1s2u09g-control:focus{
+    
+    background-color: hsl(227deg 46% 14%) !important;
+    border-radius:15px !important;
+    border-color:grey !important
+
+}
+div.css-2613qy-menu .react-select__menu-list{
+    
+    background-color: hsl(227deg 46% 14%) !important;
+    border-radius:15px !important;
+    border-color:grey !important
+
+}
+div.css-2613qy-menu div{
+    background-color: hsl(227deg 46% 14%) !important;
+}
