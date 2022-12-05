@@ -20,32 +20,50 @@
 .round-lg {
     border-radius: 15px;
 }
-.css-1s2u09g-control{
-    
-    background-color: hsl(227deg 46% 14%) !important;
-    border-radius:15px !important;
-    border-color:grey !important;
-    color:white !important
 
+.css-1s2u09g-control {
+
+    background-color: hsl(227deg 46% 14%) !important;
+    border-radius: 15px !important;
+    border-color: grey !important;
+    color: white !important
 }
 
-.css-qc6sy-singleValue{
-    color:white !important
+.css-qc6sy-singleValue {
+    color: white !important
 }
-.css-1s2u09g-control:focus{
-    
-    background-color: hsl(227deg 46% 14%) !important;
-    border-radius:15px !important;
-    border-color:grey !important
 
-}
-div.css-2613qy-menu .react-select__menu-list{
-    
-    background-color: hsl(227deg 46% 14%) !important;
-    border-radius:15px !important;
-    border-color:grey !important
+.css-1s2u09g-control:focus {
 
-}
-div.css-2613qy-menu div{
     background-color: hsl(227deg 46% 14%) !important;
+    border-radius: 15px !important;
+    border-color: grey !important
+}
+
+div.css-2613qy-menu .react-select__menu-list {
+
+    background-color: hsl(227deg 46% 14%) !important;
+    border-radius: 15px !important;
+    border-color: grey !important
+}
+
+div.css-2613qy-menu div {
+    background-color: hsl(227deg 46% 14%) !important;
+}
+
+.ant-pagination-item a {
+    background: #ecf1ec4a;
+}
+
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+    background: #ecf1ec4a;
+}
+
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link:hover,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link:hover {
+    background: #ecf1ec4a;
+}
+.ant-progress-text{
+    color:white !important;
 }

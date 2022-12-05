@@ -1,6 +1,6 @@
 {
-  "short_name": "Vision UI Dashboard",
-  "name": "Vision UI Dashboard React",
+  "short_name": "Beat App",
+  "name": "Beat Admin App",
   "icons": [
     {
       "src": "favicon.png",

@@ -14,7 +14,7 @@ import Footer from "examples/Footer";
 import VuiInput from "components/VuiInput";
 import palette from "assets/theme/base/colors";
 import radialGradient from "assets/theme/functions/radialGradient";
-import { Table, Spin } from "antd";
+import { Table, Progress } from "antd";
 import VuiButton from "components/VuiButton";
 import { Modal } from "antd";
 import borders from "assets/theme/base/borders";
@@ -29,7 +29,7 @@ import Firebase from "firebase";
 
 const _db = getDatabase();
 const formInit = {
-  subscription_name: "", icon_path: "", iconNm: "", color: "", charge_amount: "",description:"", price :""
+  subscription_name: "", icon_path: "", iconNm: "", color: "", charge_amount: "", description: "", price: ""
 }
 function Dashboard() {
   const [modalForm, setModalForm] = useState({ ...formInit });
@@ -74,7 +74,7 @@ function Dashboard() {
       key: "color",
       title: "Description",
       dataIndex: "description",
-     
+
     },
     {
       key: "price",
@@ -112,7 +112,7 @@ function Dashboard() {
     setIsModalOpen(true);
     setPreviewImage(record.icon_path)
   }
-
+  const [percent, setPercent] = useState(0);
 
   const handleSubmit = async (e) => {
     setLoadingState(true)
@@ -141,7 +141,7 @@ function Dashboard() {
           uploadTask.on("state_changed",
             (snapshot) => {
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log('Upload is ' + progress + '% done');
+              setPercent(parseInt(progress));
               switch (snapshot.state) {
                 case 'paused':
                   console.log('Upload is paused');
@@ -159,6 +159,7 @@ function Dashboard() {
               getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
                 _form.icon_path = downloadURL;
                 console.log("Upload was succeeded!", downloadURL);
+                setPercent(0);
                 resolve();
               })
             }
@@ -267,155 +268,159 @@ function Dashboard() {
               <VuiButton variant="gradient" color="primary" onClick={onAddClick}><Icon>edit</Icon>Add</VuiButton>
             </VuiBox>
             <Modal style={{ background: "none" }} open={isModalOpen} closable={false} footer={null} >
-              <Spin spinning={loadingState}>
 
 
-                <div className="bg-c-dark round-lg p-5">
-                  <h3 className="text-light">
-                    Subscription Form
-                  </h3>
-                  <div className="">
-                    <VuiBox component="form" role="form">
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            Name
-                          </VuiTypography>
-                        </VuiBox>
-                        <GradientBorder
-                          minWidth="100%"
-                          padding="1px"
-                          borderRadius={borders.borderRadius.lg}
-                          backgroundImage={radialGradient(
-                            palette.gradients.borderLight.main,
-                            palette.gradients.borderLight.state,
-                            palette.gradients.borderLight.angle
-                          )}
-                        >
-                          <VuiInput type="text" name="subscription_name" value={modalForm.subscription_name} onChange={InputChange} placeholder="" fontWeight="500" />
-                        </GradientBorder>
+
+              <div className="bg-c-dark round-lg p-5">
+                <h3 className="text-light">
+                  Subscription Form
+                </h3>
+                <div className="">
+                  <VuiBox component="form" role="form">
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          Name
+                        </VuiTypography>
                       </VuiBox>
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            charge_amount
-                          </VuiTypography>
-                        </VuiBox>
-                        <GradientBorder
-                          minWidth="100%"
-                          padding="1px"
-                          borderRadius={borders.borderRadius.lg}
-                          backgroundImage={radialGradient(
-                            palette.gradients.borderLight.main,
-                            palette.gradients.borderLight.state,
-                            palette.gradients.borderLight.angle
-                          )}
-                        >
-                          <VuiInput type="number" name="charge_amount" value={modalForm.charge_amount} onChange={InputChange} placeholder="" fontWeight="500" />
-                        </GradientBorder>
-                      </VuiBox>
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            Price
-                          </VuiTypography>
-                        </VuiBox>
-                        <GradientBorder
-                          minWidth="100%"
-                          padding="1px"
-                          borderRadius={borders.borderRadius.lg}
-                          backgroundImage={radialGradient(
-                            palette.gradients.borderLight.main,
-                            palette.gradients.borderLight.state,
-                            palette.gradients.borderLight.angle
-                          )}
-                        >
-                          <VuiInput type="number" name="price" value={modalForm.price} onChange={InputChange} placeholder="" fontWeight="500" />
-                        </GradientBorder>
-                      </VuiBox>
-
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            Icon
-                          </VuiTypography>
-                        </VuiBox>
-
-                        <div className="d-flex">
-                          <div className="  rounded d-flex flex-wrap align-content-center justify-content-center" style={{ width: 100, height: 100, border: "2px dashed grey" }}>
-                            <label className="d-block">
-                              <input type="file" onChange={handleicon_path} className="d-none" />
-                              <h3 className="p-3 pb-0 pt-0">+</h3>
-                              <h6>UPLOAD</h6>
-                            </label>
-                          </div>
-                          <div className="border border-secondary p-1 ml-1 rounded" style={{ width: 100, height: 100, marginLeft: 5 }}>
-
-                            {previewImage && <img src={previewImage} width="100%" height="100%" />}
-                          </div>
-
-                        </div>
-                      </VuiBox>
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            Color
-                          </VuiTypography>
-                        </VuiBox>
-                        <GradientBorder
-                          minWidth="100%"
-                          padding="1px"
-                          borderRadius={borders.borderRadius.lg}
-                          backgroundImage={radialGradient(
-                            palette.gradients.borderLight.main,
-                            palette.gradients.borderLight.state,
-                            palette.gradients.borderLight.angle
-                          )}
-                        >
-                          <VuiInput type="color" name="color" value={modalForm.color} onChange={InputChange} placeholder="" fontWeight="500" />
-                        </GradientBorder>
-                      </VuiBox>
-                      <VuiBox mb={2}>
-                        <VuiBox mb={1} ml={0.5}>
-                          <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                            Description
-                          </VuiTypography>
-                        </VuiBox>
-                        <GradientBorder
-                          minWidth="100%"
-                          padding="1px"
-                          borderRadius={borders.borderRadius.lg}
-                          backgroundImage={radialGradient(
-                            palette.gradients.borderLight.main,
-                            palette.gradients.borderLight.state,
-                            palette.gradients.borderLight.angle
-                          )}
-                        >
-                          <VuiInput  name="description" value={modalForm.description} onChange={InputChange} multiline rows= {3} placeholder="" fontWeight="500" />
-                        </GradientBorder>
-                      </VuiBox>
-
-                      <VuiBox mt={4} mb={1}>
-                        <div className="row">
-                          <div className="col-md-6 p-2">
-                            <VuiButton color="info" fullWidth onClick={handleSubmit}>
-                              Submit
-                            </VuiButton>
-                          </div>
-
-                          <div className="col-md-6 p-2">
-                            <VuiButton color="info" fullWidth onClick={e => setIsModalOpen(false)}>
-                              cancel
-                            </VuiButton>
-                          </div>
-
-                        </div>
-                      </VuiBox>
-
+                      <GradientBorder
+                        minWidth="100%"
+                        padding="1px"
+                        borderRadius={borders.borderRadius.lg}
+                        backgroundImage={radialGradient(
+                          palette.gradients.borderLight.main,
+                          palette.gradients.borderLight.state,
+                          palette.gradients.borderLight.angle
+                        )}
+                      >
+                        <VuiInput type="text" name="subscription_name" value={modalForm.subscription_name} onChange={InputChange} placeholder="" fontWeight="500" />
+                      </GradientBorder>
                     </VuiBox>
-                  </div>
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          charge_amount
+                        </VuiTypography>
+                      </VuiBox>
+                      <GradientBorder
+                        minWidth="100%"
+                        padding="1px"
+                        borderRadius={borders.borderRadius.lg}
+                        backgroundImage={radialGradient(
+                          palette.gradients.borderLight.main,
+                          palette.gradients.borderLight.state,
+                          palette.gradients.borderLight.angle
+                        )}
+                      >
+                        <VuiInput type="number" name="charge_amount" value={modalForm.charge_amount} onChange={InputChange} placeholder="" fontWeight="500" />
+                      </GradientBorder>
+                    </VuiBox>
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          Price
+                        </VuiTypography>
+                      </VuiBox>
+                      <GradientBorder
+                        minWidth="100%"
+                        padding="1px"
+                        borderRadius={borders.borderRadius.lg}
+                        backgroundImage={radialGradient(
+                          palette.gradients.borderLight.main,
+                          palette.gradients.borderLight.state,
+                          palette.gradients.borderLight.angle
+                        )}
+                      >
+                        <VuiInput type="number" name="price" value={modalForm.price} onChange={InputChange} placeholder="" fontWeight="500" />
+                      </GradientBorder>
+                    </VuiBox>
+
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          Icon
+                        </VuiTypography>
+                      </VuiBox>
+
+                      <div className="d-flex">
+                        <div className="  rounded d-flex flex-wrap align-content-center justify-content-center" style={{ width: 100, height: 100, border: "2px dashed grey" }}>
+                          <label className="d-block">
+                            <input type="file" onChange={handleicon_path} className="d-none" />
+                            <h3 className="p-3 pb-0 pt-0">+</h3>
+                            <h6>UPLOAD</h6>
+                          </label>
+                        </div>
+                        <div className="border border-secondary p-1 ml-1 rounded" style={{ width: 100, height: 100, marginLeft: 5 }}>
+
+                          {previewImage && <img src={previewImage} width="100%" height="100%" />}
+                        </div>
+
+                      </div>
+                    </VuiBox>
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          Color
+                        </VuiTypography>
+                      </VuiBox>
+                      <GradientBorder
+                        minWidth="100%"
+                        padding="1px"
+                        borderRadius={borders.borderRadius.lg}
+                        backgroundImage={radialGradient(
+                          palette.gradients.borderLight.main,
+                          palette.gradients.borderLight.state,
+                          palette.gradients.borderLight.angle
+                        )}
+                      >
+                        <VuiInput type="color" name="color" value={modalForm.color} onChange={InputChange} placeholder="" fontWeight="500" />
+                      </GradientBorder>
+                    </VuiBox>
+                    <VuiBox mb={2}>
+                      <VuiBox mb={1} ml={0.5}>
+                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
+                          Description
+                        </VuiTypography>
+                      </VuiBox>
+                      <GradientBorder
+                        minWidth="100%"
+                        padding="1px"
+                        borderRadius={borders.borderRadius.lg}
+                        backgroundImage={radialGradient(
+                          palette.gradients.borderLight.main,
+                          palette.gradients.borderLight.state,
+                          palette.gradients.borderLight.angle
+                        )}
+                      >
+                        <VuiInput name="description" value={modalForm.description} onChange={InputChange} multiline rows={3} placeholder="" fontWeight="500" />
+                      </GradientBorder>
+                    </VuiBox>
+
+                    <VuiBox mt={4} mb={1}>
+                      <div className="row">
+                        <div className="col-md-6 p-2">
+                          <VuiButton color="info" fullWidth onClick={handleSubmit}>
+                            Submit
+                          </VuiButton>
+                        </div>
+
+                        <div className="col-md-6 p-2">
+                          <VuiButton color="info" fullWidth onClick={e => setIsModalOpen(false)}>
+                            cancel
+                          </VuiButton>
+                        </div>
+
+                      </div>
+                    </VuiBox>
+
+                  </VuiBox>
                 </div>
-              </Spin>
+              </div>
+              {
+                loadingState && <div className="d-flex justify-content-center" style={{ position: "absolute", top: 0, background: "rgba(0,0,0,0.5)", color: "white", width: "100%", height: "100%", padding: "20%", paddingTop: "30%", alignItems: "center" }}>
+                  <Progress percent={percent} type="circle" strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+                </div>
+              }
             </Modal>
             <VuiBox
               sx={{
