@@ -41,6 +41,7 @@
 // Vision UI Dashboard React layouts
 import Dashboard from "layouts/dashboard";
 import ArtistMng from "layouts/ArtistMng";
+import BannerMng from "layouts/BannerMng";
 import Subscript from "layouts/Subscript";
 import UserMng from "layouts/UserMng";
 import SignIn from "layouts/authentication/sign-in";
@@ -91,6 +92,15 @@ const routes = [
     route: "/admin/subscriptions",
     icon: <IoPersonAdd size="15px" color="inherit" />,
     component: Subscript,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Banner Management",
+    key: "subscription",
+    route: "/admin/bannerMng",
+    icon: <IoPersonAdd size="15px" color="inherit" />,
+    component: BannerMng,
     noCollapse: true,
   },
  
