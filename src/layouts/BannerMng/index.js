@@ -297,7 +297,7 @@ function Dashboard() {
                             }}
                         >
                             
-                            <div className="d-flex" style={rows.length==0&&{height:300}}>
+                            <div className="d-flex" style={rows.length==0?{height:300}:{}}>
                                 {
                                     rows.map(item=>(
                                         <div className="p-3">
