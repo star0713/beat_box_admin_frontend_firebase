@@ -20,14 +20,12 @@ import { Table, Spin, Progress } from "antd";
 
 import { Modal } from "antd";
 import borders from "assets/theme/base/borders";
-
-
 import GetImage from "components/GetImage";
 import { ref, getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
-import { getDatabase, ref as d_ref, onValue, set, push, update, child, remove } from "firebase/database";
+import { doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore"
 import Firebase from "firebase";
-import { height } from "@mui/system";
-const _db = getDatabase();
+
+const StoreDB = Firebase.StoreDB;
 const formInit = {
   track_name: "", track_file: "", track_bpm: "", track_genre: "", track_artist: "", amount_of_credits: ""
 }
@@ -56,7 +54,7 @@ function Dashboard() {
       dataIndex: "track_name",
       sortDirections: ['ascend', 'descend',],
       sorter: (a, b, sortOrder) => {
-        console.log(sortOrder); return sortOrder == "ascend" ? a.track_name > b.track_name : a.track_name < b.track_name
+       return sortOrder == "ascend" ? a.track_name > b.track_name : a.track_name < b.track_name
       },
     },
 
@@ -83,15 +81,7 @@ function Dashboard() {
       title: "Artist",
       dataIndex: "track_artist",
       sortDirections: ['ascend', 'descend', 'ascend'],
-      // sorter: (a, b, sortOrder) => {
-      //   if (artists.length > 0) {
-
-      //     return sortOrder == "ascend" ? a.name > b.name : a.name < b.name
-      //   }
-      //   return sortOrder == "ascend" ? a.name > b.name : a.name < b.name
-      // },
       render: (text) => {
-        console.log(text, artists.find(artist => artist.value == text), "artist")
         return artists.find(artist => artist.value == text)?.label
       }
 
@@ -104,14 +94,11 @@ function Dashboard() {
       sortDirections: ['ascend', 'descend', 'ascend'],
 
       render: (text) => (<VuiButton color="warning" onClick={e => { e.stopPropagation(); handleDelete(text) }}>delete</VuiButton>)
-
     },
-
-
   ];
-  console.log()
-  const handleDelete = (key) => {
-    remove(child(d_ref(_db), "beats/" + key));
+
+  const handleDelete = async (key) => {
+    await deleteDoc(doc(StoreDB, "beats", key));
     const DeleteRow = rows.filter(row => row.key == key);
     const storage = Firebase.storage;
     const desertRefForImg = ref(storage, DeleteRow.imageNm);
@@ -123,10 +110,11 @@ function Dashboard() {
 
     }
   }
+
   const handleRowClick = (record) => {
+    
     let _modalForm = record;
     _modalForm.track_artist = artists.find(artist => artist.value == record.track_artist);
-
     setModalForm(_modalForm);
     setIsModalOpen(true);
     setPreviewImage(record.track_thumbnail)
@@ -156,7 +144,7 @@ function Dashboard() {
 
           const storeRef = ref(storage, `files/beatfile/${nowtime.getTime()}.${ext}`);
           const uploadTask = uploadBytesResumable(storeRef, _form.beatFile);
-          console.log(storeRef, "beatfile", _form.beatFile)
+         
           uploadTask.on("state_changed",
             (snapshot) => {
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -239,12 +227,9 @@ function Dashboard() {
         await Promise.all(promises);
 
       }
-      console.log(_form, "form")
-      if (!_form.key)
-        _form.key = push(child(d_ref(_db), "beats")).key;
-      console.log(_form, "secondFrom")
-      update(d_ref(_db), {
-        [`/beats/${_form.key}`]: {
+  
+      if (!_form.key) {
+        await addDoc(collection(StoreDB), "beats", {
           track_genre: _form.track_genre,
           track_name: _form.track_name,
           track_thumbnail: _form.track_thumbnail,
@@ -254,14 +239,29 @@ function Dashboard() {
           track_bpm: _form.track_bpm,
           track_artist: _form.track_artist.value,
           amount_of_credits: _form.amount_of_credits,
-        }
-      });
+          playCount: 0
+        })
+
+      }
+      else {
+        updateDoc(doc(StoreDB, "beats", _form.key), {
+          track_genre: _form.track_genre,
+          track_name: _form.track_name,
+          track_thumbnail: _form.track_thumbnail,
+          track_file: _form.track_file,
+          imageNm: _form.imageNm,
+          beatFileNm: _form.beatFileNm,
+          track_bpm: _form.track_bpm,
+          track_artist: _form.track_artist.value,
+          amount_of_credits: _form.amount_of_credits,
+        })
+      }
+
       setIsModalOpen(false);
       setModalForm(formInit);
       setLoadingState(false)
     }
     catch (e) {
-      console.error(e, "e")
       setIsModalOpen(false)
       setModalForm(formInit);
       setLoadingState(false)
@@ -270,69 +270,27 @@ function Dashboard() {
 
   }
   useEffect(() => {
-    // Firebase.auth.getUsers().then((res)=>{
-    //   console.log(res,"getUsers")
-    // })
 
-    const collection = d_ref(_db, 'beats/');
-    onValue(collection, (snapshot) => {
-      const data = snapshot.val();
+    const BeatCollection = collection(StoreDB, "beats");
+    onSnapshot(BeatCollection, (snapshot) => {
       let beatData = [];
-      if (data === null) {
-        setRows([])
-        return;
-      }
-      Object.keys(data).map(key => {
-        beatData.push(
-          {
-            ...data[key],
-            key: key
-          }
-        )
-      });
-      setRows(beatData);
+      snapshot.forEach(doc => {
+        beatData.push({ ...doc.data(), key: doc.id })
+      })
 
-
+      setRows([...beatData])
     })
-    const artCollection = d_ref(_db, "artists/");
-    onValue(artCollection, (snapshot) => {
-      const data = snapshot.val();
-
+    const artCollection = collection(StoreDB, "artists")
+    onSnapshot(artCollection, (snapshot) => {
       let artData = [];
-
-      if (data === null) {
-        setArtists([]);
-        return;
-      }
-      console.log(data, Object.keys(data), "test")
-      Object.keys(data).map(key => {
-        artData.push({
-          value: key,
-          label: data[key].name,
-        });
-
+      snapshot.forEach(doc => {
+        artData.push({ value: doc.id, name: doc.data().name })
       })
-      //console.log(artData,"aaaaa")
+
       setArtists(artData);
-
-      const usersCollection = d_ref(_db, "/users");
-      onValue(usersCollection, (snapshot) => {
-        console.log(snapshot.val(), "users")
-      })
-
-
-
     })
-
-    // const newId = push(child(d_ref(_db),"beats")).key;
-    // update(d_ref(_db),{["/beats/"+newId]:{
-    //   name:"dfd", desription:"dsaa"}
-    // })
 
   }, [])
-  console.log(Firebase.auth, "auth")
-  console.log(modalForm, "form---")
-  console.log(artists, "artdatastate")
   const handlePreview = async (file) => {
     if (!file.url) {
       file.preview = await GetImage(file);
@@ -363,7 +321,7 @@ function Dashboard() {
     let _form = { ...modalForm };
     _form["beatFile"] = e.target.files[0];
     _form["beatFileNm"] = e.target.files[0].name;
-    console.log(_form)
+  
     setModalForm(_form);
 
   }
@@ -379,8 +337,6 @@ function Dashboard() {
               </VuiTypography>
               <VuiButton variant="gradient" color="primary" onClick={onAddClick}><Icon>edit</Icon>Add</VuiButton>
             </VuiBox>
-
-
             <Modal style={{ background: "none" }} open={isModalOpen} closable={false} footer={null} >
 
               <div className="bg-c-dark round-lg p-5">
@@ -413,18 +369,12 @@ function Dashboard() {
                     <VuiBox mb={2}>
 
                       <label className="btn btn-light text-dark">
-
                         Beat file upload
                         <input type="file" onChange={handleBeatFile} className="d-none" />
-
-
                       </label>
                       <span className="text-white m-3">
                         {modalForm.beatFileNm}
                       </span>
-
-
-
                     </VuiBox>
 
                     {/* upload thumbnail */}
@@ -449,11 +399,8 @@ function Dashboard() {
                         </div>
 
                       </div>
-
-
-
-
                     </VuiBox>
+
                     {/* track_genre */}
                     <VuiBox mb={2}>
                       <VuiBox mb={1} ml={0.5}>
@@ -472,8 +419,10 @@ function Dashboard() {
                         )}
                       >
                         <VuiInput type="text" name="track_genre" value={modalForm.track_genre} onChange={InputChange} placeholder="Genre of Beat file..." fontWeight="500" />
+
                       </GradientBorder>
                     </VuiBox>
+
                     {/* track_bpm */}
                     <VuiBox mb={2}>
                       <VuiBox mb={1} ml={0.5}>
@@ -558,7 +507,6 @@ function Dashboard() {
                       </GradientBorder>
                     </VuiBox>
 
-
                     <VuiBox mt={4} mb={1}>
                       <div className="row">
                         <div className="col-md-6 p-2">
@@ -566,7 +514,6 @@ function Dashboard() {
                             Submit
                           </VuiButton>
                         </div>
-
                         <div className="col-md-6 p-2">
                           <VuiButton color="info" fullWidth onClick={e => setIsModalOpen(false)}>
                             cancel
@@ -580,8 +527,8 @@ function Dashboard() {
                 </div>
               </div>
               {
-                loadingState && <div className="d-flex justify-content-center" style={{ position: "absolute", top: 0, background: "rgba(0,0,0,0.5)", color: "white", width: "100%", height: "100%", padding:"20%", paddingTop: "30%", alignItems: "center" }}>
-                  <Progress percent={percent} type="circle" strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }}  />
+                loadingState && <div className="d-flex justify-content-center" style={{ position: "absolute", top: 0, background: "rgba(0,0,0,0.5)", color: "white", width: "100%", height: "100%", padding: "20%", paddingTop: "30%", alignItems: "center" }}>
+                  <Progress percent={percent} type="circle" strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
                 </div>
               }
             </Modal>
@@ -612,19 +559,10 @@ function Dashboard() {
           </Card>
         </VuiBox>
 
-        {/* <Grid container spacing={3} direction="row" justifyContent="center" alignItems="stretch">
-          <Grid item xs={12} md={6} lg={8}>
-            <Projects />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <OrderOverview />
-          </Grid>
-        </Grid> */}
       </VuiBox>
       <Footer />
 
     </DashboardLayout>
-
   );
 }
 

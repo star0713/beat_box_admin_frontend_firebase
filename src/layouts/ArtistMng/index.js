@@ -21,9 +21,10 @@ import { Modal } from "antd";
 import borders from "assets/theme/base/borders";
 import GetImage from "components/GetImage";
 import { ref, getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
-import { getDatabase, ref as d_ref, onValue, set, push, update, child, remove } from "firebase/database";
+// import { getDatabase, ref as d_ref, onValue, set, push, update, child, remove } from "firebase/database";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import Firebase from "firebase";
-const _db = getDatabase();
+const StoreDB = Firebase.StoreDB;
 const formInit = {
 	name: "", description: "", imageNm: ""
 }
@@ -47,7 +48,7 @@ function Dashboard() {
 			dataIndex: "name",
 			sortDirections: ['ascend', 'descend',],
 			sorter: (a, b, sortOrder) => {
-				console.log(sortOrder); return sortOrder == "ascend" ? a.name > b.name : a.name < b.name
+				return sortOrder == "ascend" ? a.name > b.name : a.name < b.name
 			},
 		},
 		{
@@ -60,8 +61,8 @@ function Dashboard() {
 		},
 	];
 
-	const handleDelete = (key) => {
-		remove(child(d_ref(_db), "artists/" + key));
+	const handleDelete = async (key) => {
+		await deleteDoc(doc(StoreDB, "artists", key));
 		const DeleteRow = rows.filter(row => row.key == key);
 		const storage = Firebase.storage;
 		const desertRefForImg = ref(storage, DeleteRow.imageNm);
@@ -77,7 +78,6 @@ function Dashboard() {
 		setIsModalOpen(true);
 		setPreviewImage(record.ImageURL)
 	}
-
 
 	const handleSubmit = async (e) => {
 		setLoadingState(true)
@@ -139,18 +139,26 @@ function Dashboard() {
 				await Promise.all(promises);
 
 			}
-			console.log(_form, "form")
-			if (!_form.key)
-				_form.key = push(child(d_ref(_db), "artists")).key;
-
-			update(d_ref(_db), {
-				[`/artists/${_form.key}`]: {
+			
+			if (!_form.key) {
+				//add data
+				const docRef = await addDoc(collection(StoreDB, "artists"), {
 					name: _form.name,
 					description: _form.description,
 					ImageURL: _form.ImageURL,
 					imageNm: _form.imageNm,
-				}
-			});
+					follows:0
+				})
+			}
+			else{
+				const updateRef = doc(StoreDB, "artists", _form.key);
+				await updateDoc(updateRef, {
+					name: _form.name,
+					description: _form.description,
+					ImageURL: _form.ImageURL,
+					imageNm: _form.imageNm,
+				} )
+			}
 			setIsModalOpen(false);
 			setModalForm(formInit);
 			setLoadingState(false)
@@ -161,30 +169,17 @@ function Dashboard() {
 			setModalForm(formInit);
 			setLoadingState(false)
 		}
-
-
 	}
 	useEffect(() => {
 
-		const collection = d_ref(_db, 'artists/');
-		onValue(collection, (snapshot) => {
-			const data = snapshot.val();
-			let beatData = [];
-			if (data === null) {
-				setRows([])
-				return;
-			}
-			Object.keys(data).map(key => {
-				beatData.push(
-					{
-						...data[key],
-						key: key
-					}
-				)
-			});
-			setRows(beatData);
+		const artistCollection = collection(StoreDB, "artists");
+		onSnapshot(artistCollection, (snapshot) => {
+			let _artists = [];
+			snapshot.forEach((doc) => {
 
-
+				_artists.push({ ...doc.data(), key: doc.id })
+			})
+		setRows(_artists)
 		})
 
 

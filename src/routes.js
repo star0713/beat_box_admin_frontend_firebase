@@ -97,7 +97,7 @@ const routes = [
   {
     type: "collapse",
     name: "Banner Management",
-    key: "subscription",
+    key: "banner Mng",
     route: "/admin/bannerMng",
     icon: <IoPersonAdd size="15px" color="inherit" />,
     component: BannerMng,

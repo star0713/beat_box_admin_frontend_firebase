@@ -5,7 +5,7 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
-// import { getFirestore, addDoc, collection } from "firebase/firestore";
+import { getFirestore, addDoc, collection } from "firebase/firestore";
 import {getDatabase} from "firebase/database";
 import {getStorage} from "firebase/storage";
 
@@ -50,11 +50,13 @@ const SignOut = async () => {
     }
 }
 const db = getDatabase(app);
+const StoreDB = getFirestore(app);
 const storage = getStorage(app);
 export default {
     signIn: signIn,
     onAuthStateChanged,
     DB: db,
+    StoreDB,
     SignOut,
     auth: auth,
     storage
