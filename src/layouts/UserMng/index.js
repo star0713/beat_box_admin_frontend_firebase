@@ -96,6 +96,8 @@ function Dashboard() {
   const getUsers = async()=>{
     const getUsersRequest = httpsCallable(functions,"getUsers");
     const resp = await getUsersRequest();
+    console.log(resp,"resp")
+    let userlist; 
     if(resp.data){
 
       userlist = resp.data;
