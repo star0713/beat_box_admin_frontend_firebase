@@ -11,14 +11,15 @@ import {getStorage} from "firebase/storage";
 
 // const history = useHistory();
 const firebaseConfig = {
-    apiKey: "AIzaSyDMAUllzZOl_95SqF9gw6p61axMiqOLVc4",
-    authDomain: "beatbox-fed3f.firebaseapp.com",
-    projectId: "beatbox-fed3f",
-    storageBucket: "beatbox-fed3f.appspot.com",
-    messagingSenderId: 484962252809,
-    appId: "1:484962252809:web:bd3684f1d90db41200a0d8",
-    databaseURL:`https://beatbox-fed3f-default-rtdb.firebaseio.com`,
-};
+    apiKey: "AIzaSyBWN2ZiA53yel4arCcKV_6j7Vw0T_-WVWA",
+    authDomain: "beatbox-eb2b7.firebaseapp.com",
+    databaseURL: "https://beatbox-eb2b7-default-rtdb.firebaseio.com",
+    projectId: "beatbox-eb2b7",
+    storageBucket: "beatbox-eb2b7.appspot.com",
+    messagingSenderId: "821225767067",
+    appId: "1:821225767067:web:a57611f14acbd7bbfac63e",
+    measurementId: "G-1F0J0K8NE4"
+  };
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth();
@@ -59,5 +60,6 @@ export default {
     StoreDB,
     SignOut,
     auth: auth,
-    storage
+    storage,
+    app,
 }

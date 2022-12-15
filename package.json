@@ -47,6 +47,7 @@
 		"eject": "react-scripts eject",
 		"install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"
 	},
+	"proxy": "http://localhost:80",
 	"eslintConfig": {
 		"extends": [
 			"react-app",
