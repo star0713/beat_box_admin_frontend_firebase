@@ -29,21 +29,15 @@ import Firebase from "firebase";
 
 const _db = getDatabase();
 const formInit = {
-  subscription_name: "", icon_path: "", iconNm: "", color: "", charge_amount: "", description: "", price: ""
+  subscription_name: "",  color: "", charge_amount: "", description: "", price: ""
 }
 function Dashboard() {
   const [modalForm, setModalForm] = useState({ ...formInit });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const [rows, setRows] = useState([]);
   const [loadingState, setLoadingState] = useState(false);
   const columns = [
-    {
-      key: "Icon",
-      title: "Icon",
-      dataIndex: "icon_path",
-      render: (text) => (<img src={text} width="50" height={50} className="rounded " style={{ marginLeft: 35 }} />)
-    },
+   
     {
       key: "name",
       title: "Name",
@@ -101,92 +95,25 @@ function Dashboard() {
     const storage = Firebase.storage;
     const desertRefForImg = ref(storage, DeleteRow.iconNm);
 
-    try {
-      deleteObject(desertRefForImg);
-    } catch (e) {
-
-    }
+    
   }
   const handleRowClick = (record) => {
     setModalForm(record);
     setIsModalOpen(true);
-    setPreviewImage(record.icon_path)
   }
-  const [percent, setPercent] = useState(0);
 
   const handleSubmit = async (e) => {
-    setLoadingState(true)
+   
     let _form = { ...modalForm };
-    let nowtime = new Date();
-    let promises = [];
-
-    if (_form.icon_file) {
-      promises.push(
-        new Promise((resolve, reject) => {
-          const storage = Firebase.storage;
-          if (_form.key && _form.iconNm) {
-
-            const desertRef = ref(storage, _form.iconNm);
-            try {
-              deleteObject(desertRef);
-            } catch (e) {
-
-            }
-          }
-          let ext = _form.icon_file.name.split(".").pop();
-
-          _form.iconNm = `/files/icons/${nowtime.getTime()}.${ext}`;
-          const storeRef = ref(storage, `files/icons/${nowtime.getTime()}.${ext}`);
-          const uploadTask = uploadBytesResumable(storeRef, _form.icon_file);
-          uploadTask.on("state_changed",
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setPercent(parseInt(progress));
-              switch (snapshot.state) {
-                case 'paused':
-                  console.log('Upload is paused');
-                  break;
-                case 'running':
-                  console.log('Upload is running');
-                  break;
-              }
-            },
-            (error) => {
-              console.error("Upload was failed.");
-              reject();
-            },
-            () => {
-              getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-                _form.icon_path = downloadURL;
-                console.log("Upload was succeeded!", downloadURL);
-                setPercent(0);
-                resolve();
-              })
-            }
-          )
-        })
-      )
-    }
+    console.log(_form, "form1")
     try {
-
-      if (promises.length > 0) {
-        await Promise.all(promises);
-
-      }
-      console.log(_form, "forhhhhhhhhhhhhhhhm")
       if (!_form.key)
         _form.key = push(child(d_ref(_db), "subscriptions")).key;
-      console.log({
-        subscription_name: _form.subscription_name,
-        charge_amount: _form.charge_amount,
-        icon_path: _form.icon_path,
-        color: _form.color,
-      }, "secondform");
+      console.log(_form,"_form")
       update(d_ref(_db), {
         [`/subscriptions/${_form.key}`]: {
           subscription_name: _form.subscription_name,
           charge_amount: _form.charge_amount,
-          icon_path: _form.icon_path,
           color: _form.color,
           description: _form.description,
           price: _form.price
@@ -194,14 +121,12 @@ function Dashboard() {
       });
       setIsModalOpen(false);
       setModalForm(formInit);
-      setLoadingState(false)
 
     }
     catch (e) {
       console.log(e);
       setIsModalOpen(false)
       setModalForm(formInit);
-      setLoadingState(false)
     }
 
 
@@ -229,16 +154,9 @@ function Dashboard() {
 
 
   }, [])
-  const handlePreview = async (file) => {
-    if (!file.url) {
-      file.preview = await GetImage(file);
-      setPreviewImage(file.preview)
-    }
 
-  }
   const onAddClick = (e) => {
     setModalForm(formInit);
-    setPreviewImage(null)
     setIsModalOpen(true);
   }
   const InputChange = (e) => {
@@ -247,13 +165,7 @@ function Dashboard() {
     setModalForm(_form);
   }
 
-  const handleicon_path = e => {
-    if (!e.target.files[0]) return;
-    handlePreview(e.target.files[0]);
-    let _form = { ...modalForm };
-    _form["icon_file"] = e.target.files[0];
-    setModalForm(_form);
-  }
+
 
   return (
     <DashboardLayout>
@@ -334,29 +246,7 @@ function Dashboard() {
                         <VuiInput type="number" name="price" value={modalForm.price} onChange={InputChange} placeholder="" fontWeight="500" />
                       </GradientBorder>
                     </VuiBox>
-
-                    <VuiBox mb={2}>
-                      <VuiBox mb={1} ml={0.5}>
-                        <VuiTypography component="label" variant="button" color="white" fontWeight="medium">
-                          Icon
-                        </VuiTypography>
-                      </VuiBox>
-
-                      <div className="d-flex">
-                        <div className="  rounded d-flex flex-wrap align-content-center justify-content-center" style={{ width: 100, height: 100, border: "2px dashed grey" }}>
-                          <label className="d-block">
-                            <input type="file" onChange={handleicon_path} className="d-none" />
-                            <h3 className="p-3 pb-0 pt-0">+</h3>
-                            <h6>UPLOAD</h6>
-                          </label>
-                        </div>
-                        <div className="border border-secondary p-1 ml-1 rounded" style={{ width: 100, height: 100, marginLeft: 5 }}>
-
-                          {previewImage && <img src={previewImage} width="100%" height="100%" />}
-                        </div>
-
-                      </div>
-                    </VuiBox>
+                    
                     <VuiBox mb={2}>
                       <VuiBox mb={1} ml={0.5}>
                         <VuiTypography component="label" variant="button" color="white" fontWeight="medium">

@@ -29,7 +29,7 @@ function Footer() {
             sx={{ textAlign: "center", fontWeight: "400 !important" }}
             color="text"
           >
-            @ 2021, Made with ❤️{" Yaroslav Danko"} ❤️
+            @ 2023, Made with ❤️{" Wilderness Technologies Ltd"} ❤️
             <VuiTypography
               component="a"
               variant="button"

@@ -37,7 +37,7 @@ function Footer() {
           sx={{ textAlign: "center", fontWeight: "400 !important" }}
           color="white"
         >
-          @ 2022, Made with &nbsp;&nbsp;&nbsp;❤️ {" Yaroslave Danko "}
+          @ 2023, Made with &nbsp;&nbsp;&nbsp;❤️ {"Wilderness Technologies Ltd "}
           ❤️&nbsp;&nbsp;&nbsp; 
           for a better web
         </VuiTypography>

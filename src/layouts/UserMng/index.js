@@ -86,9 +86,10 @@ function Dashboard() {
   ];
 
   const handleDelete = async(key) => {
-    const getUsersRequest = httpsCallable(functions,"deletUser?userid="+key);
+    const getUsersRequest = httpsCallable(functions,"deleteUser?userid="+key);
     const resp = await getUsersRequest();
-    getUsers();
+
+    await getUsers();
   }
   const handleRowClick = (record) => {
    
